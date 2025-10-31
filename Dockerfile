@@ -15,3 +15,5 @@ EXPOSE 8080
 
 # 6️⃣ Lệnh chạy ứng dụng
 CMD ["java", "-jar", "target/WebApplicationProject-1.0-SNAPSHOT.jar"]
+
+RUN echo "PORT = $PORT"
