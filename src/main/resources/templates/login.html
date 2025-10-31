@@ -1,0 +1,49 @@
+<!-- Modal đăng nhập -->
+<!-- fragments/login.html -->
+<div th:fragment="loginModal" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header"><h5>Đăng nhập</h5></div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-2" placeholder="Email">
+                    <input type="password" class="form-control mb-2" placeholder="Mật khẩu">
+                </div>
+                <div class="modal-footer">
+                    <!-- Nút đóng -->
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+
+                    <!-- Nút đăng nhập -->
+                    <button class="btn btn-primary">Đăng nhập</button>
+
+                    <!-- Nút đăng ký -->
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#RegisterModal" data-bs-dismiss="modal">
+                        Đăng ký
+                    </button>
+
+                    <!-- Nút tiếp tục mua sắm -->
+                    <button class="btn btn-outline-dark" data-bs-dismiss="modal">
+                        Tiếp tục mua sắm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal đăng ký -->
+<div class="modal fade" id="RegisterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5>Đăng ký</h5></div>
+            <div class="modal-body">
+                <form>
+                    <input type="text" class="form-control mb-2" placeholder="Họ và tên">
+                    <input type="email" class="form-control mb-2" placeholder="Email">
+                    <input type="password" class="form-control mb-2" placeholder="Mật khẩu">
+                    <button type="submit" class="btn btn-success w-100">Đăng ký</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

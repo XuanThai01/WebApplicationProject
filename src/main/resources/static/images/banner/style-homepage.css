@@ -1,0 +1,40 @@
+     .carousel-item {
+      transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+     }
+     .product {
+         padding: -15px;
+         margin-bottom: 30px;
+         position: relative;
+         transition: all 0.5s ease;
+         z-index: 0;
+         box-shadow: 0 0 5px 5px rgba(196, 195, 195, 0.5);
+       }
+    .product:hover{
+     transform: translateY(-5px); /* nâng cả col */
+     z-index: 1; /* để nổi lên trên các cột khác */
+     box-shadow: 0 0 10px 10px rgba(196, 195, 195, 0.5);
+     }
+             .product-name{
+          transition: all 0.3s ease;
+        }
+        .product:hover .product-name{
+
+          color: rgb(246, 81, 27);
+        }
+
+        .product-price{
+          color: rgb(205, 70, 70);
+        }
+        .product-size span {
+          margin-right: 7px;
+          border: 1px solid rgba(0, 0, 0,0.3);
+
+          padding: 0 7px;
+        }
+        .product-size > span.active {
+            color: aliceblue;
+            background-color: rgb(74, 157, 87);
+        }
+        .table-pd img,span{
+          cursor : pointer;
+        }

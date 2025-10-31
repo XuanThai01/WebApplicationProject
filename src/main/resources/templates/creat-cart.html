@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .gallery {
+      width: 600px; /* chiều rộng khung */
+
+  }
+
+  .main-image img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+  }
+
+  .thumbnails {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      gap: 10px;
+  }
+
+  .thumbnails img {
+      width: 100px;
+      height: 70px;
+      object-fit: cover;
+      cursor: pointer;
+      border: 2px solid transparent;
+      border-radius: 5px;
+      transition: border 0.3s;
+  }
+
+  .thumbnails img:hover {
+      border: 2px solid #007bff;
+  }
+    .active {
+    border: 2px solid red;
+    font-weight: bold;
+  }
+  .disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  .option {
+  display: inline-block;
+  padding: 6px 12px;
+  margin: 5px;
+  border: 2px solid red;
+  border-radius: 4px;
+  cursor: pointer;         /* hover vào thành pointer */
+  user-select: none;       /* không cho bôi đen chữ */
+  transition: 0.2s;
+}
+#stock-info, #price-product {
+    background-color: #f8f9fa; /* nền nhạt */
+    padding: 0 10px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+
+    </style>
+</head>
+<body style="background-color: #f5f5f5;">
+<div class="container my-5">
+    <div class="card shadow-lg rounded-3">
+        <div class="card-header text-white" style="background-color: #a8dadc; color: #1d3557;">
+            <h4 class="mb-0">Khởi tạo giỏ hàng</h4>
+        </div>
+        <div class="card-body">
+            <div class="row justify-content-center">
+                <div class="col-6" >
+                    <div class="gallery">
+                        <div class="main-image">
+                            <img id="displayed" th:src="@{${productDetail.imgProduct}}" alt="Main Image">
+                        </div>
+                        <div class="thumbnails">
+                            <img class="thumb" src="/images/banner/imgmini2.jpg" alt="Thumb 1">
+                            <img class="thumb" src="/images/banner/imgmini3.jpg" alt="Thumb 2">
+                            <img class="thumb" src="/images/banner/imgmini4.jpg" alt="Thumb 3">
+                            <img class="thumb" src="/images/banner/imgmini5.jpg" alt="Thumb 4">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-5" style="background-color: rgb(255, 255, 255);">
+                    <h3 th:text="${productDetail.name}">Tên sản phẩm</h3>
+                    <span class="pv" th:each="v : ${productDetail.productVariants}"
+                          th:data-vid="${v.id}" th:data-vsize="${v.size}" th:data-vcolor="${v.color}"
+                          th:data-vprice="${v.price}" th:data-vquantity="${v.quantity}"></span>
+
+                    <div>
+                        <h5>Chọn màu:</h5>
+                        <span th:each="v : ${productDetail.productVariants}"
+                              class="option color-option" th:data-color="${v.color}" th:text="${v.color}">Đỏ</span>
+                    </div>
+                    <div>
+                        <h5>Chọn size:</h5>
+                        <span th:each="v : ${productDetail.productVariants}"
+                              class="option size-option" th:data-size="${v.size}" th:text="${v.size}">M</span>
+                    </div>
+                    <p id="stock-info"></p>
+                    <p id="price-product"></p>
+                    <form th:action="@{/cart}" method="POST">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" id="idpv" name="idpv">
+                        <div class="mb-2">
+                            <label for="number">Nhập số lượng</label><br>
+                            <input type="number" name="number" id="number" class="form-control w-50">
+                        </div>
+                        <button id="buy-btn" type="submit" class="btn btn-success" disabled>Mua ngay</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function() {
+    $(".thumb").click(function() {
+       var src = $(this).attr("src");
+       $("#displayed").attr("src", src);
+   });
+   let pvs = [];
+   $(".pv").each(function(){
+        pvs.push({  id    : $(this).data("vid"),
+                    size  : $(this).data("vsize"),
+                    color : $(this).data("vcolor"),
+                    price : $(this).data("vprice"),
+                 quantity : $(this).data("vquantity")})
+
+   });
+      console.log(pvs);
+
+    let selectedColor=null;
+    let selectedSize=null;
+
+    function check(){
+      let productV = null;
+      if(selectedColor && selectedSize){
+       productV = pvs.find(p => p.color===selectedColor && p.size === selectedSize)
+      }
+      if(productV){
+        if(productV.quantity > 0){
+             $("#stock-info").text("Còn "+ productV.quantity + " sản phẩm");
+              $("#price-product").text("giá sản phẩm :"+ productV.price);
+
+             $("#buy-btn").prop("disabled", false);
+             $("#idpv").val(productV.id);
+        }else{
+           $("#stock-info").text("Hết hàng");
+          $("#buy-btn").prop("disabled", true);
+        }
+      }
+    }
+      $(".color-option, .size-option").data("unchecked", true);
+    //
+
+    $(".color-option").click(function(){
+          if($(this).hasClass("disabled")) return ;
+
+          if($(this).hasClass("active")){
+                $(this).removeClass("active");
+
+                selectedColor = null ;
+             if($(".size-option").hasClass("active")){
+                console.log("abcdef");
+                $(".size-option").removeClass("disabled");
+                selectedSize = $(".size-option.active").data("size");
+                $(".color-option").each(scanColor);
+                $(this).data("unchecked",true);
+                $("#stock-info").text("");
+                $("#price-product").text("");
+                $("#buy-btn").prop("disabled", true);
+                return;
+             }
+
+             $(".size-option").removeClass("disabled").prop("disabled", false);
+
+             $("#stock-info").text("");
+             $("#price-product").text("");
+             $("#buy-btn").prop("disabled", true);
+          }else{
+             $(".color-option").removeClass("active");
+             $(this).addClass("active");
+             selectedColor = $(this).data("color");
+
+            // selectedSize = null;
+            // $(".size-option").removeClass("active");
+
+             $(".size-option").each(scanSize);
+             $(this).data("unchecked",false);
+          }
+
+          check();
+         // $("#stock-info").text("");
+         // $("#buy-btn").prop("disabled", true);
+    })
+    //
+             function scanSize() {
+                const size = $(this).data("size");
+                const pv = pvs.find(p => p.size ===size && p.color === selectedColor )
+                if(!pv || pv.quantity === 0){
+
+                  $(this).addClass("disabled").removeClass("active").prop("disabled",true);
+                }else{
+                    $(this).removeClass("disabled").prop("disabled",false);
+                }
+
+             }
+
+    // Khi chọn size
+    $(".size-option").click(function() {
+        if ($(this).hasClass("disabled")) return; // bỏ qua nếu disable
+
+
+        //chọn màu trước rồi chọn size sau
+
+
+        if ($(this).hasClass("active")) {
+           // Nếu click lại chính nó thì hủy chọn
+           $(this).removeClass("active");
+           selectedSize = null;
+
+
+           //click lại size với trường hợp bên color đã chọn
+           if($(".color-option").hasClass("active")){
+
+               $(".color-option").removeClass("disabled");
+               selectedColor = $(".color-option.active").data("color");
+               $(".size-option").each(scanSize);
+               $(this).data("unchecked",true);
+               $("#stock-info").text("");
+               $("#price-product").text("");
+               $("#buy-btn").prop("disabled", true);
+               return;
+           }
+
+            // Reset màu
+            $(".color-option").removeClass("disabled").prop("disabled", false);
+            $("#stock-info").text("");
+            $("#price-product").text("");
+            $("#buy-btn").prop("disabled", true);
+        } else {
+            // Chọn size mới
+            $(".size-option").removeClass("active");
+
+            $(this).addClass("active");
+            selectedSize = $(this).data("size");
+
+            // Disable màu nào hết hàng với size này
+            $(".color-option").each(scanColor);
+            $(this).data("unchecked",false);
+        }
+      check();
+});
+     //
+       function  scanColor() {
+              const color = $(this).data("color");
+              const product = pvs.find(p => p.color === color && p.size === selectedSize);
+              if (!product || product.quantity === 0) {
+                $(this).addClass("disabled").removeClass("active").prop("disabled", true);
+
+              } else {
+                $(this).removeClass("disabled").prop("disabled", false);
+              }
+
+             }
+});
+</script>
+</body>
+</html>

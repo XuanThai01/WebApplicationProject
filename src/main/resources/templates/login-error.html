@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lỗi đăng nhập</title>
+</head>
+<body>
+<h2>Đăng nhập thất bại</h2>
+
+<p style="color:red;">Sai tài khoản hoặc mật khẩu!</p>
+<h2>Xin chào, <span th:text="${username}"></span>!</h2>
+<p>Quyền của bạn: <span th:text="${roles}"></span></p>
+<a th:href="@{/login}">🔄 Thử lại</a>
+</body>
+</html>

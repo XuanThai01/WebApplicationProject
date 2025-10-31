@@ -1,0 +1,44 @@
+<div th:fragment="RegisterModal" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div class="modal fade" id="RegisterModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered"> <!-- modal-dialog cần thiết -->
+            <div class="modal-content"> <!-- modal-content cần thiết -->
+                <div class="modal-header">
+                    <h5 class="modal-title">Đăng ký</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                    <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+                    <!-- Form gửi OTP -->
+                    <form th:action="@{/register/send-otp}" th:object="${registerRequest}" method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" th:field="*{email}" class="form-control" id="email" placeholder="Nhập email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Họ và tên</label>
+                            <input type="text" th:field="*{fullName}" class="form-control" id="fullName" placeholder="Nhập họ tên" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <input type="password" th:field="*{password}" class="form-control" id="password" placeholder="Nhập mật khẩu" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Gửi OTP</button>
+                    </form>
+
+                    <hr/>
+
+                    <!-- Form verify OTP -->
+                    <form th:action="@{/register/verify}" th:object="${registerRequest}" method="post">
+                        <div class="mb-3">
+                            <label for="otp" class="form-label">Nhập OTP</label>
+                            <input type="text" th:field="*{otp}" class="form-control" id="otp" placeholder="Nhập mã OTP" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Xác thực & Đăng ký</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

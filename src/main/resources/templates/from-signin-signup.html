@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="/images/banner/style-signin-signup.css">
+    <title>Modern Login Page | AsmrProg</title>
+</head>
+
+<body>
+
+<div class="container" id="container">
+    <div class="form-container sign-up">
+        <form  id="registerForm">
+            <h1>Create Account</h1>
+            <div class="social-icons">
+                <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+            <span>or use your email for registeration</span>
+
+            <div id="error" ></div>
+            <div id="message">
+                <span>Verify infomation !</span>
+            </div>
+
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <input name="fullname" type="text" placeholder="Name">
+            <input name="email" type="email" placeholder="Email">
+            <input name="password" type="password" placeholder="Password">
+            <button type="submit" >Get OTP</button>
+        </form>
+        <form id="verifyOtp" th:action="@{/register/verify}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input type="text" name="otp" id="otp" placeholder="Nhập mã OTP" required> <!-- th:field="*{otp}"-->
+            <button type="submit" >Verify OTP & Sign Up</button>
+        </form>
+    </div>
+    <div class="form-container sign-in">
+        <form class="dangnhap">
+            <h1>Sign In</h1>
+            <div class="social-icons">
+                <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
+                <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
+            </div>
+            <span>or use your email password</span>
+            <div id="messageLogin" ><span>Verify infomation !</span></div>
+            <input type="text" name="username"  placeholder="UserName">
+            <input type="password" name="password" placeholder="Password">
+            <!-- CSRF token -->
+            <input type="hidden" name="_csrf" value="${_csrf.token}" class="csrf-token"/>
+            <a href="#">Forget Your Password?</a>
+            <button type="submit">Sign In</button>
+        </form>
+        <span class="nologin">Continue shopping as a guest</span>
+    </div>
+    <div class="toggle-container">
+        <div class="toggle">
+            <div class="toggle-panel toggle-left">
+                <h1>Welcome Back!</h1>
+                <p>Enter your personal details to use all of site features</p>
+                <button class="hidden" id="login">Sign In</button>
+            </div>
+            <div class="toggle-panel toggle-right">
+                <h1>Hello, Friend!</h1>
+                <p>Register with your personal details to use all of site features</p>
+                <button class="hidden" id="register">Sign Up</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+       $("#registerForm").on("submit", function(e) {
+       e.preventDefault();
+       let formData = $(this).serialize();  // tạo chuỗi form-data key=value&...
+       let csrfToken = $("input[name='_csrf']").val();
+
+       $.ajax({
+           url: "register/send-otp",
+           type: "POST",
+           data: formData,                   // gửi dưới dạng form-data
+           beforeSend: function(xhr) {
+               xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
+           },
+           success: function(res) {
+                  $("#message").html('<span style="font-size:13px;">✅</span> ' + res.message);
+                   currentOtpRequest = res.registerRequest;
+
+           },
+           error: function(err) {
+               console.log(err);
+           }
+       });
+   });
+
+ let currentOtpRequest = null;
+   $("#verifyOtp").on("submit", function(e) {
+       e.preventDefault();
+    console.log(currentOtpRequest);
+       let csrfToken = $("input[name='_csrf']").val();
+       let formArray = $(this).serializeArray();
+
+       // Gộp dữ liệu form vào object
+       formArray.forEach(item => {
+           currentOtpRequest[item.name] = item.value;
+       });
+
+       $.ajax({
+           url: "/register/verify",
+           type: "POST",
+           contentType: "application/json",
+           data: JSON.stringify(currentOtpRequest),
+           beforeSend: function(xhr) {
+               xhr.setRequestHeader("X-CSRF-TOKEN", csrfToken);
+           },
+           success: function(res) {
+               // Hiển thị thông báo
+               $("#message").text('<span style="font-size:13px;">✅</span> ' +res.message);
+
+               // Lấy document cha (vì đang ở trong iframe)
+               const parentDoc = window.parent.document;
+               const iframeContainer = parentDoc.getElementById("iframeContainer");
+               const overlay = parentDoc.getElementsByClassName("overlay")[0];
+
+               // Ẩn overlay bằng animation
+               iframeContainer.classList.remove("hienlai");
+               iframeContainer.classList.add("bienmat");
+               iframeContainer.addEventListener("animationend", function () {
+                       setTimeout(() => {
+                        overlay.style.display = "none";
+                       }, 400);
+               }, { once: true });
+
+           },
+           error: function(err) {
+               console.log(err);
+               $("#message").text("Có lỗi xảy ra!").css("color", "red");
+           }
+       });
+   });
+
+
+       window.onload = function () {
+           const parentDoc = window.parent.document;
+           const iframeContainer = parentDoc.getElementById("iframeContainer");
+           const overlay = parentDoc.getElementsByClassName("overlay")[0];
+
+           document.getElementsByClassName("nologin")[0].addEventListener("click", function () {
+                iframeContainer.classList.remove("hienlai");
+               iframeContainer.classList.add("bienmat");
+               iframeContainer.addEventListener("animationend", function () {
+                   overlay.style.display = "none";
+               }, { once: true });
+           });
+       };
+
+
+          const container = document.getElementById('container');
+          const registerBtn = document.getElementById('register');
+          const loginBtn = document.getElementById('login');
+
+          registerBtn.addEventListener('click', () => {
+              container.classList.add("active");
+          });
+
+          loginBtn.addEventListener('click', () => {
+              container.classList.remove("active");
+          });
+    document.addEventListener("DOMContentLoaded", function() {
+    const form = document.querySelector(".dangnhap");
+    const message = document.querySelector("#messageLogin span");
+       let csrfToken = $("input[name='_csrf']").val();
+
+    form.addEventListener("submit", function(e) {
+        e.preventDefault(); // ngăn reload trang
+
+        const username = form.querySelector("input[name='username']").value;
+        const password = form.querySelector("input[name='password']").value;
+
+        fetch("/doLogin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRF-TOKEN": csrfToken
+            },
+            body: new URLSearchParams({
+                username: username,
+                password: password
+            })
+        })
+        .then(response => {
+            if (response.ok) return response.json();
+            throw new Error("Login failed");
+        })
+        .then(data => {
+            if(data.status === "ok") {
+                message.textContent = "Login successful!";
+                message.style.color = "green";
+                // redirect sau khi login thành công
+                 // Lấy document cha (vì đang ở trong iframe)
+               const parentDoc = window.parent.document;
+               const iframeContainer = parentDoc.getElementById("iframeContainer");
+               const overlay = parentDoc.getElementsByClassName("overlay")[0];
+
+               // Ẩn overlay bằng animation
+               iframeContainer.classList.remove("hienlai");
+               iframeContainer.classList.add("bienmat");
+               iframeContainer.addEventListener("animationend", function () {
+                       setTimeout(() => {
+                        overlay.style.display = "none";
+                       }, 400);
+               }, { once: true });
+            } else {
+                message.textContent = data.message || "Login failed!";
+                message.style.color = "red";
+            }
+        })
+        .catch(err => {
+            message.textContent = err.message;
+            message.style.color = "red";
+        });
+    });
+});
+
+</script>
+</body>
+
+</html>
