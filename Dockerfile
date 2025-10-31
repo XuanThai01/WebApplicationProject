@@ -11,7 +11,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # 5️⃣ Mở port 8080
-EXPOSE 8080
+EXPOSE 10000
 
 # 6️⃣ Lệnh chạy ứng dụng
 CMD ["java", "-jar", "target/WebApplicationProject-1.0-SNAPSHOT.jar"]
