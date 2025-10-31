@@ -1,17 +1,17 @@
-# Chọn image Maven + Java
+# 1️⃣ Chọn image Maven + Java
 FROM maven:3.9.2-eclipse-temurin-17
 
-# Set thư mục làm việc trong container
+# 2️⃣ Set thư mục làm việc trong container
 WORKDIR /app
 
-# Copy toàn bộ project vào container
+# 3️⃣ Copy toàn bộ project vào container
 COPY . .
 
-# Build project bằng Maven
+# 4️⃣ Build project bằng Maven (Spring Boot Maven Plugin sẽ tạo executable JAR)
 RUN mvn clean package -DskipTests
 
-# Mở port 8080
+# 5️⃣ Mở port 8080
 EXPOSE 8080
 
-# Lệnh chạy ứng dụng
+# 6️⃣ Lệnh chạy ứng dụng
 CMD ["java", "-jar", "target/WebApplicationProject-1.0-SNAPSHOT.jar"]
