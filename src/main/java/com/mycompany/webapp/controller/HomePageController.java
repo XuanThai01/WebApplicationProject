@@ -58,7 +58,10 @@ public class HomePageController {
         this.productService=productService;
         this.supplierService=supplierService;
     }
-
+    @GetMapping("/")
+    public String redirectRoot() {
+        return "redirect:/listpd";
+    }
     @GetMapping("/listpd")
     public String getListPdwithPdvr(HttpServletRequest servletRequest,Model model,HttpServletRequest request){
 
