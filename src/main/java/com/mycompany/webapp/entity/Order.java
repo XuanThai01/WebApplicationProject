@@ -26,6 +26,9 @@ public class Order {
     @Enumerated(EnumType.STRING) // Lưu status dưới dạng số (0,1,2,3)
     private OrderStatus status = OrderStatus.CHUA_XAC_NHAN;
 
+    @Column(unique = true)
+    private String txnRef; // vnp_TxnRef
+
     private String shippingAddress;
 
     private String note;
@@ -217,5 +220,22 @@ public class Order {
 
     public void setPayPrice(BigDecimal payPrice) {
         this.payPrice = payPrice;
+    }
+
+    public String getTxnRef() {
+        return txnRef;
+    }
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setTxnRef(String txnRef) {
+        this.txnRef = txnRef;
     }
 }

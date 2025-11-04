@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>VNPay Result</title>
+</head>
+<body>
+<h2 th:text="${message}">Kết quả</h2>
+
+<h3>Chi tiết trả về:</h3>
+<table>
+    <tr th:each="entry : ${params.entrySet()}">
+        <td th:text="${entry.key}"></td>
+        <td th:text="${entry.value}"></td>
+    </tr>
+</table>
+
+<a href="/payment/">Quay lại thanh toán</a>
+</body>
+</html>

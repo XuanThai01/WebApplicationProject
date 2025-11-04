@@ -299,7 +299,7 @@ if (paymethod === "COD") {
          }
           async function handleVnPay(data) {
               try {
-                  const response = await fetch("fakepay/checkout", {
+                  const response = await fetch("/payment/create", {
                       method: "POST",
                       headers: {
                           "Content-Type": "application/json",
