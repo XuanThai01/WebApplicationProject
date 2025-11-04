@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -52,11 +55,17 @@ public class PaymentService {
 
         if (bankCode != null && !bankCode.isEmpty()) vnpParams.put("vnp_BankCode", bankCode);
 
-        Calendar cld = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        vnpParams.put("vnp_CreateDate", formatter.format(cld.getTime()));
-        cld.add(Calendar.MINUTE, 15);
-        vnpParams.put("vnp_ExpireDate", formatter.format(cld.getTime()));
+        ZoneId zone = ZoneId.of("Asia/Ho_Chi_Minh");
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime now = LocalDateTime.now(zone);
+
+        // Tạo thời gian tạo giao dịch
+        vnpParams.put("vnp_CreateDate", now.format(formatter));
+
+        // Thời gian hết hạn: +15 phút
+        LocalDateTime expire = now.plusMinutes(15);
+        vnpParams.put("vnp_ExpireDate", expire.format(formatter));
 
         // build hash data
         String hashData = VnpayUtil.buildHashData(vnpParams);
