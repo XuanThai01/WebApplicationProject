@@ -738,7 +738,8 @@ public class HomePageController {
         return ip;
     }
     @PostMapping("/payment/create")
-    public String createPayment(@RequestBody Map<String, Object> data ,HttpServletRequest servletRequest) {
+    public  Map<String, Object> createPayment(@RequestBody Map<String, Object> data ,HttpServletRequest servletRequest) {
+        Map<String, Object> res = new HashMap<>();
 
         // 1. Create order (amount in VND)
         Order orderCreat =createOder(data,shippingMethodService,servletRequest,userService,cartService);
@@ -749,7 +750,11 @@ public class HomePageController {
         String payUrl = paymentService.buildPaymentUrl(order, clientIp, "vn", null);
 
         // 3. Redirect to VNPAY page
-        return "redirect:" + payUrl;
+
+        res.put("status", "OK");
+        res.put("paymentUrl", payUrl);
+
+        return res;
     }
 
     // Return URL (browser redirect) — only show result

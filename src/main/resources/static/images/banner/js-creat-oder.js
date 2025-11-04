@@ -310,8 +310,8 @@ if (paymethod === "COD") {
 
                   const result = await response.json(); // parse response JSON
 
-                  if (result.result) {
-                      window.location.href = result.result;
+                  if (result.paymentUrl) {
+                        window.location.href = result.paymentUrl;
                   } else {
                       alert("Không thể tạo link thanh toán!");
                   }
