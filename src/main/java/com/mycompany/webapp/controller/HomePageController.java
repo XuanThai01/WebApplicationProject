@@ -738,7 +738,7 @@ public class HomePageController {
         return ip;
     }
     @PostMapping("/payment/create")
-    public  Map<String, Object> createPayment(@RequestBody Map<String, Object> data ,HttpServletRequest servletRequest) {
+    public ResponseEntity<Map<String, Object>> createPayment(@RequestBody Map<String, Object> data ,HttpServletRequest servletRequest) {
         Map<String, Object> res = new HashMap<>();
 
         // 1. Create order (amount in VND)
@@ -754,7 +754,7 @@ public class HomePageController {
         res.put("status", "OK");
         res.put("paymentUrl", payUrl);
 
-        return res;
+        return ResponseEntity.ok(res);
     }
 
     // Return URL (browser redirect) — only show result
