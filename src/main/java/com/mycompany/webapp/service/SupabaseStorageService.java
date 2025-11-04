@@ -2,7 +2,7 @@ package com.mycompany.webapp.service;
 
 
 import com.mycompany.webapp.configuration.SupabaseConfig;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
