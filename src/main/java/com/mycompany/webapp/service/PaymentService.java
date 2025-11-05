@@ -27,7 +27,7 @@ public class PaymentService {
     public Order createOrder(Order order){
         String txnRef = getRandomNumber(8);
         order.setTxnRef(txnRef);
-        order.setDescription("đơn hàng đang được thanh toán bằng cổng thanh toán VNPAY");
+        order.setDescription("The order is being processed through the VNPAY payment gateway.");
         return orderRepository.save(order);
     }
 
