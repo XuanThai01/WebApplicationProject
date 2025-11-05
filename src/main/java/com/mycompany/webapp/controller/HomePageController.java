@@ -3,6 +3,7 @@ package com.mycompany.webapp.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mycompany.webapp.configuration.SupabaseConfig;
+import com.mycompany.webapp.configuration.VnpConfig;
 import com.mycompany.webapp.entity.*;
 import com.mycompany.webapp.service.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,6 +50,8 @@ public class HomePageController {
     SupabaseStorageService supabaseStorageService;
     @Autowired
     PaymentService paymentService;
+    @Autowired
+    VnpConfig vnpConfig;
     public HomePageController(ProductService productService,SupplierService supplierService,UserService userService,OrderService orderService,ProductdetailService productdetailService, ProductVariantService productVariantService, CartService cartService,UserInfoService userInfoService,VoucherService voucherService,ShippingMethodService shippingMethodService,UsedVoucherService usedVoucherService) {
         this.productdetailService = productdetailService;
         this.productVariantService = productVariantService;
@@ -769,7 +772,7 @@ public class HomePageController {
         fields.remove("vnp_SecureHashType");
 
         String signValue = VnpayUtil.buildHashData(fields);
-        signValue = VnpayUtil.hmacSHA512(/* key */ getHashSecret(), signValue);
+        signValue = VnpayUtil.hmacSHA512(/* key */ vnpConfig.vnpHashSecret , signValue);
 
         if (signValue.equals(vnpSecureHash)) {
             String respCode = fields.get("vnp_ResponseCode");
@@ -798,7 +801,7 @@ public class HomePageController {
         fields.remove("vnp_SecureHashType");
 
         String hashData = VnpayUtil.buildHashData(fields);
-        String signValue = VnpayUtil.hmacSHA512(getHashSecret(), hashData);
+        String signValue = VnpayUtil.hmacSHA512(vnpConfig.vnpHashSecret, hashData);
 
         Map<String, String> result = new HashMap<>();
         try {
@@ -881,10 +884,7 @@ public class HomePageController {
     }
 
     // In real project, put secret in config; for demo, read from environment or config bean
-    private String getHashSecret() {
-        // Replace with a proper injection of VnpConfig; kept simple to avoid long code
-        return System.getProperty("vnp.hashSecret", "YOUR_HASH_SECRET");
-    }
+
     }
 
 
