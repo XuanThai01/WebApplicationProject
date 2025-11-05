@@ -789,7 +789,7 @@ public class HomePageController {
     }
 
     // IPN URL (VNPAY server calls this) — Update DB
-    @GetMapping("/IPN")
+    @GetMapping("/payment/IPN")
     @ResponseBody
     public ResponseEntity<Map<String, String>> vnpayIpn(HttpServletRequest request) {
         Map<String, String> fields = new HashMap<>();
