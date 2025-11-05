@@ -29,7 +29,7 @@ public class SecurityConfig {
         http
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/payment/**","/image/**","/","/cart/**","/images/**","/listpd/**","/creat_cart/**","/page-cart","/updateCart","/updateCartQty","/register/**","/api/products/search","/login-page","/creatOder","/submitOrder","/orders/save","/page-order-detail","/orders/delete","/cart/delete","/manage/**","/checkout","/fakepay/**").permitAll()
+                        .requestMatchers("/IPN","/payment/**","/image/**","/","/cart/**","/images/**","/listpd/**","/creat_cart/**","/page-cart","/updateCart","/updateCartQty","/register/**","/api/products/search","/login-page","/creatOder","/submitOrder","/orders/save","/page-order-detail","/orders/delete","/cart/delete","/manage/**","/checkout","/fakepay/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
