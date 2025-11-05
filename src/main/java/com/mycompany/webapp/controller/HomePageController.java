@@ -789,7 +789,7 @@ public class HomePageController {
     }
 
     // IPN URL (VNPAY server calls this) — Update DB
-    @GetMapping("IPN")
+    @GetMapping("/payment/vnpay_ipn")
     @ResponseBody
     public ResponseEntity<Map<String, String>> vnpayIpn(HttpServletRequest request) {
         Map<String, String> fields = new HashMap<>();
@@ -875,6 +875,7 @@ public class HomePageController {
         // assembly-time: call repository via paymentService (implement save method).
         // We'll call reflection to invoke save if not present - but simpler: cast and call via service
         try {
+            order.setDescription("ipn");
             java.lang.reflect.Method m = paymentService.getClass().getMethod("saveOrder", Order.class);
             m.invoke(paymentService, order);
         } catch (Exception e) {
