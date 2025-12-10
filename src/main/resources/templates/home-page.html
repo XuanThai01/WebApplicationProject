@@ -208,77 +208,92 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
     $(document).ready(function(){
+        let typingTimer;                // timer
+        const typingDelay = 600;       // 1 giây
 
-         $("#searchInput").on("keyup", function () {
-        let keyword = $(this).val();
-        if (keyword.length >= 2) { // gõ >= 2 ký tự mới tìm
-            $.ajax({
-                url: "/api/products/search",
-                type: "GET",
-                data: {keyword: keyword},
-                success: function (data) {
-              console.log("thành công ", data);
-                    let resultBox = $("#searchResult");
-                    resultBox.empty();
-                    if (data.length > 0) {
-                           console.log("lớn hơn 1")
-                        data.forEach(p => {
-                            resultBox.append(`
-                                   <a href="" class="list-group-item list-group-item-action">${p.name}</a>
-                            `);
+        $("#searchInput").on("keyup", function () {
+            const keyword = $(this).val();
 
-                        });
-                    }
+            clearTimeout(typingTimer);  // xóa timer cũ
+            if (keyword.length >= 2) {
+                typingTimer = setTimeout(function() {
+                    $.ajax({
+                        url: "/api/products/search",
+                        type: "GET",
+                        data: { keyword: keyword },
+                        success: function (data) {
+                            const resultBox = $("#searchResult");
+                            resultBox.empty();
 
-                }
-            });
-        } else {
-            $("#searchResult").empty();
-        }
-    });
-
-        $(".table-pd").each(function(){
-            var container = $(this);
-
-            // Set size đầu tiên active
-            var firstSpan = container.find(".product-size span").first();
-            firstSpan.addClass("active");
-
-            // Hiển thị giá mặc định cho sản phẩm này
-            container.find(".product-price").text(
-                "giá : " + firstSpan.data("price").toLocaleString("vi-VN") + " đ"
-            );
-
-            // Click vào size đổi active và update giá
-            container.find(".product-size span").click(function(){
-                container.find(".product-size span").removeClass("active");
-                $(this).addClass("active");
-
-                container.find(".product-price").text(
-                    "giá : " + $(this).data("price").toLocaleString("vi-VN") + " đ"
-                );
-            });
-
-            // Click vào ảnh → chỉ lấy variant đang active
-            container.find('.product-img').click(function(){
-
-                var activeVariant = container.find(".product-size span.active"); // chỉ lấy span active
-                var variantId = activeVariant.data("id");                         // id variant
-
-                var price = activeVariant.data("price");                           // giá variant
-                var idproductDetail = container.data("idpd");
-
-                console.log("Variant ID:", variantId);
-                console.log("Price:", price);
-
-                // Redirect
-                window.location.href = '/creat_cart?id=' + idproductDetail;
-            });
+                            if (data.length > 0) {
+                                data.forEach(p => {
+                                    resultBox.append(`
+                                        <a href="/creat_cart?id=${p.id}" class="search-item-link">
+                                            <div class="search-item">
+                                                <div class="search-item-img">
+                                                    <img src="${p.imgUrl}" alt="${p.name}">
+                                                </div>
+                                                <div class="search-item-info">
+                                                    <div class="search-item-title">${p.name}</div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    `);
+                                });
+                                resultBox.slideDown(120);
+                            } else {
+                                resultBox.slideUp(120);
+                            }
+                        }
+                    });
+                }, typingDelay);  // thực hiện sau 1s
+            } else {
+                $("#searchResult").empty();
+            }
         });
-
     });
+
+                    $(".table-pd").each(function(){
+                        var container = $(this);
+
+                        // Set size đầu tiên active
+                        var firstSpan = container.find(".product-size span").first();
+                        firstSpan.addClass("active");
+
+                        // Hiển thị giá mặc định cho sản phẩm này
+                        container.find(".product-price").text(
+                            "giá : " + firstSpan.data("price").toLocaleString("vi-VN") + " đ"
+                        );
+
+                        // Click vào size đổi active và update giá
+                        container.find(".product-size span").click(function(){
+                            container.find(".product-size span").removeClass("active");
+                            $(this).addClass("active");
+
+                            container.find(".product-price").text(
+                                "giá : " + $(this).data("price").toLocaleString("vi-VN") + " đ"
+                            );
+                        });
+
+                        // Click vào ảnh → chỉ lấy variant đang active
+                        container.find('.product-img').click(function(){
+
+                            var activeVariant = container.find(".product-size span.active"); // chỉ lấy span active
+                            var variantId = activeVariant.data("id");                         // id variant
+
+                            var price = activeVariant.data("price");                           // giá variant
+                            var idproductDetail = container.data("idpd");
+
+                            console.log("Variant ID:", variantId);
+                            console.log("Price:", price);
+
+                            // Redirect
+                            window.location.href = '/creat_cart?id=' + idproductDetail;
+                        });
+                    });
+
+
 </script>
 
 </body>

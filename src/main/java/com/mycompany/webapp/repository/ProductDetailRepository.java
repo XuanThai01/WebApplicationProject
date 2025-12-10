@@ -22,4 +22,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail,Lon
 
     @Query("SELECT p FROM ProductDetail p WHERE lower(p.name) LIKE lower(concat('%', :keyword, '%'))")
     List<ProductDetail> searchByName(@Param("keyword") String keyword);
+
+    @Query("SELECT pd FROM ProductDetail pd WHERE pd.product.id = :productId")
+    List<ProductDetail> findByProductId(@Param("productId") Integer productId);
 }

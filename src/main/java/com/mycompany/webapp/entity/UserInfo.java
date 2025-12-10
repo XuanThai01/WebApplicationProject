@@ -25,7 +25,7 @@ public class UserInfo {
     private String fullName;
 
     @Lob
-    @Column(name = "avatar",columnDefinition ="BYTEA")
+    @Column(name = "avatar")
     private byte[] profileImage;  // lưu ảnh dạng nhị phân
 
     @Column(name = "email")

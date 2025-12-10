@@ -57,4 +57,11 @@ public class UserService {
     }
 
 
+    public String getPasswordByUsername(String user) {
+        return userRepository.findByUsername(user).getPassword();
+    }
+
+    public void save(User existingUser) {
+        userRepository.save(existingUser);
+    }
 }

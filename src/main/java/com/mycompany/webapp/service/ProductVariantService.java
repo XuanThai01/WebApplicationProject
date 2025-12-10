@@ -29,4 +29,8 @@ public class ProductVariantService {
     public void save(ProductVariant pv) {
         productVariantRepository.save(pv);
     }
+
+    public void delete(ProductVariant productVariant) {
+        productVariantRepository.delete(productVariant);
+    }
 }

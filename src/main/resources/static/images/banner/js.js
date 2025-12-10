@@ -1,250 +1,3 @@
-<!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.w3.org/1999/xhtml">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản lý Product Detail & Variant</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-    .editable {
-      border: 1px solid transparent; /* giữ khung sẵn để không giật */
-      background: transparent;
-      border-radius: 4px;
-      padding: 2px 6px;
-      color: #333;
-      width: 100%;
-      pointer-events: none; /* Không cho chỉnh khi chưa sửa */
-    }
-
-    /* Khi bật chế độ sửa */
-    .editing .editable {
-      border: 1px solid #ced4da;
-      background: #ffffffe8;
-      pointer-events: auto;
-      border-radius: 4px;
-      padding: 2px 6px;
-    }
-    .btn-group-action .btn {
-      min-width: 50px;
-      transition: 0.2s;
-      font-weight: 500;
-    }
-</style>
-</head>
-
-<body class="bg-light">
-
-<div class="container-flud mt-5">
-    <h2 class="mb-4 text-center text-primary">Quản lý Sản phẩm & Biến thể</h2>
-    <div th:each="entry : ${map}">
-    <h4 class="idPAndS" th:text="${entry.key}"></h4>
-
-    <!-- ======== BẢNG PRODUCT DETAIL ======== -->
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Danh sách Product Detail</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-bordered align-middle" id="productTable">
-                <thead class="table-dark text-center">
-                <tr>
-                    <th>Tên sản phẩm</th>
-                    <th>Trạng thái</th>
-                    <th>Mô tả</th>
-                    <th>đường dẫn ảnh</th>
-                    <th>ảnh</th>
-                    <th>Hành động</th>
-                </tr>
-                </thead>
-                <tbody  class="product-detail-tbody">
-                <!-- Sản phẩm -->
-                <div th:each="pd : ${entry.value}">
-
-                    <tr  th:data-idp="${pd.pd_id}">
-                      <form class="row-edit-form" action="/manage/products/update" method="post" enctype="multipart/form-data">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <td><input type="text" name="productName" class="editable" th:value="${pd.name}" disabled></td>
-                        <td>
-
-                              <select name="status" class="editable form-select form-select-sm" disabled>
-                                  <option th:value="CON_HANG"
-                                          th:selected="${pd.status == 1}">
-                                      CÒN HÀNG
-                                  </option>
-                                  <option th:value="HET_HANG"
-                                          th:selected="${pd.status == 0}">
-                                      HẾT HÀNG
-                                  </option>
-                              </select>
-
-                        </td>
-                        <td><input type="text" name="description" class="editable" th:value="${pd.descriptiondetail}" disabled></td>
-                        <td class="text-center">
-                            <div class="img-url-wrapper">
-                                <!-- Ô nhập đường dẫn ảnh -->
-                                <input type="text" name="imgUrl" class="editable img-url" th:value="${pd.imgProduct}" disabled>
-
-                                <!-- Input chọn ảnh (ẩn) -->
-                                <input type="file" class="form-control form-control-sm img-file d-none" accept="image/*">
-
-                                <!-- Nút chọn ảnh (ẩn sẵn, chỉ hiện khi đang sửa) -->
-                                <button type="button" class="btn btn-outline-primary btn-sm change-img-btn d-none mt-1">
-                                    Chọn ảnh
-                                </button>
-                            </div>
-                        </td>
-                        <td>
-                            <img th:src="${pd.imgProduct}" class="img-show" alt="" style="width: 100px; height: 100px; object-fit: cover;">
-                        </td>
-                        <td>
-                            <div class="btn-group-action d-flex justify-content-center align-items-center g-2 ">
-                                <!-- Nhóm Sửa/Xóa -->
-                                <div class="action-main d-flex justify-content-center g-2">
-                                    <button type="button" class="btn btn-sm btn-warning btn-edit">
-                                        <i class="bi bi-pencil-square"></i> Sửa
-                                    </button>
-                                    <button type="button" class="btn-delete btn btn-sm btn-danger ms-2">
-                                        <i class="bi bi-trash"></i> Xóa
-                                    </button>
-                                </div>
-
-                                <!-- Nhóm Lưu/Hủy (ẩn mặc định) -->
-                                <div class="action-edit d-none d-flex justify-content-center g-2">
-                                    <button type="button" class="btn btn-sm btn-success btn-save">
-                                        <i class="bi bi-check-circle"></i> Lưu
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-secondary btn-cancel ms-2">
-                                        <i class="bi bi-x-circle"></i> Hủy
-                                    </button>
-                                </div>
-                                |
-                                <!-- Nút Xem phiên bản -->
-                                <button type="button" class="btn btn-sm btn-info text-white ms-2"
-                                        data-bs-toggle="collapse"
-                                        th:data-bs-target="'#variants-' + ${pd.pd_id}">
-                                    <i class="bi bi-eye"></i> Xem phiên bản
-                                </button>
-                            </div>
-                        </td>
-                      </form>
-                    </tr>
-
-                    <!-- Phiên bản (variants) -->
-                <tr  th:data-idp="${pd.pd_id}" >
-                    <td  colspan="6" class="p-1" >
-                        <div th:id="'variants-' + ${pd.pd_id}" class="collapse">
-                            <table class="table mb-0" id="productTablePv">
-                                <thead class="table-light text-center">
-                                <tr>
-                                    <th>Màu</th>
-                                    <th>Size</th>
-                                    <th>Số lượng</th>
-                                    <th>Giá</th>
-                                    <th>Chất liệu</th>
-                                    <th>hành động</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="pv : ${pd.productVariants}" th:data-idpv="${pv.id}">
-                                    <td>
-                                        <input type="text" id="pv-color" class="form-control form-control-sm itempv"
-                                               th:value="${pv.color}" disabled>
-                                    </td>
-
-                                    <td>
-                                        <input type="text" id="pv-size" class="form-control form-control-sm itempv"
-                                               th:value="${pv.size}" disabled>
-                                    </td>
-
-                                    <td>
-                                        <input type="number" id="pv-quantity" class="form-control form-control-sm itempv"
-                                               th:value="${pv.quantity}" disabled>
-                                    </td>
-
-                                    <td>
-                                        <input type="text" id="pv-price" class="form-control form-control-sm itempv"
-                                               th:value="${pv.price}" disabled>
-                                    </td>
-
-                                    <td>
-                                        <input type="text" id="pv-material" class="form-control form-control-sm itempv"
-                                               th:value="${pv.material}" disabled>
-                                    </td>
-
-                                    <td>
-                                        <div class="btn-group-action d-flex justify-content-center align-items-center g-2">
-                                            <!-- Nhóm Sửa/Xóa -->
-                                            <div class="action-main-pv d-flex justify-content-center g-2">
-                                                <button type="button" class="btn btn-sm btn-warning btn-edit-pv">
-                                                    <i class="bi bi-pencil-square"></i> Sửa
-                                                </button>
-                                                <button type="button" class="btn-delete-pv btn btn-sm btn-danger ms-2">
-                                                    <i class="bi bi-trash"></i> Xóa
-                                                </button>
-                                            </div>
-
-                                            <!-- Nhóm Lưu/Hủy (ẩn mặc định) -->
-                                            <div class="action-edit-pv d-none d-flex justify-content-center g-2">
-                                                <button type="button" class="btn btn-sm btn-success btn-save-pv">
-                                                    <i class="bi bi-check-circle"></i> Lưu
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-secondary btn-cancel-pv ms-2">
-                                                    <i class="bi bi-x-circle"></i> Hủy
-                                                </button>
-                                            </div>
-
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </td>
-                </tr>
-                    <tr >
-                        <td colspan="6" class="collapse p-1" th:id="'variants-' + ${pd.pd_id}" >
-                            <button class="btn btn-primary btnAddProductVariant"  th:data-idpd="${pd.pd_id}" th:text="${'+ Thêm Product Variant mới của sản phẩm '+ pd.name}">i</button>
-                        </td>
-                    </tr>
-              </div>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    </div>
-    <div class="d-flex align-items-center gap-2 mb-3">
-        <!-- Select Supplier -->
-        <select class="form-select w-auto" id="selectSupplier" name="supplierId">
-            <option value="">-- Chọn Supplier --</option>
-            <option th:each="s : ${suppliers}"
-                    th:value="${s.id}"
-                    th:text="${s.name}">
-            </option>
-        </select>
-
-        <!-- Select Product -->
-        <select class="form-select w-auto" id="selectProduct" name="productId">
-            <option value="">-- Chọn Product --</option>
-            <option th:each="p : ${products}"
-                    th:value="${p.p_id}"
-                    th:text="${p.name}">
-            </option>
-        </select>
-
-        <!-- Button Thêm -->
-        <button class="btn btn-primary" id="btnAddProductDetail">
-            + Thêm Product Detail mới
-        </button>
-    </div>
-
-    <!-- Nơi hiển thị dòng thông tin -->
-    <div id="productDetailInfo" class="mt-2"></div>
-    <div id="productDetailContainer"></div>
-
-</div>
-    <!-- Nút thêm sản phẩm -->
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     document.querySelectorAll(".btn-edit-pv").forEach((btn) => {
   btn.addEventListener("click", function () {
@@ -306,9 +59,11 @@ document.querySelectorAll('.btn-cancel-pv').forEach(cancelBtn => {
     const btns = document.querySelectorAll(".btnAddProductVariant");
     btns.forEach(btn => {
      btn.addEventListener("click", () => {
-    const idPd = btn.getAttribute("data-idpd");
-    const collapseDiv = document.getElementById('variants-' + idPd);
-    const tbody = collapseDiv.querySelector("tbody");
+    const tbody = document.querySelector("#productTablePv tbody");
+
+    let idPd = btn.getAttribute("data-idpd");
+
+
   // Tạo một hàng mới
 
     const html = document.createElement("tr");
@@ -407,7 +162,7 @@ document.querySelectorAll('.btn-cancel-pv').forEach(cancelBtn => {
         const material  = row.querySelector("#pv-material").value.trim();
 
         // Lấy idpd từ <tr data-idp="...">
-        const idpv = row.dataset.idpv;
+        const idpd = row.dataset.idp;
 
         // Tạo param gửi về server
         const params = new URLSearchParams();
@@ -416,16 +171,15 @@ document.querySelectorAll('.btn-cancel-pv').forEach(cancelBtn => {
         params.append("quantity", quantity);
         params.append("price", price);
         params.append("material", material);
-        params.append("idpv", idpv);
+        params.append("idpd", idpd);
       console.log("📦 Dữ liệu FormData gửi đi:");
 
         try {
           // 🔹 Gửi dữ liệu lên server bằng Fetch API (AJAX)
-          const response = await fetch('/manage/productVariant/update', {
+          const response = await fetch('/manage/productDetail/update', {
             method: 'POST',
             headers: {
-              'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value || '',
-              "Content-Type": "application/x-www-form-urlencoded"
+              'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value || ''
             },
             body: params
           });
@@ -441,7 +195,10 @@ document.querySelectorAll('.btn-cancel-pv').forEach(cancelBtn => {
           input.classList.remove('editable-active');
           newValues.push(input.value);
         });
-        row.dataset.originalValuesPv = JSON.stringify(newValues);
+        row.dataset.originalValues = JSON.stringify(newValues);
+
+
+
         row.querySelector('.action-main-pv').classList.remove('d-none');
         row.querySelector('.action-edit-pv').classList.add('d-none');
         console.log("✅ Đã lưu giá trị mới:", newValues);
@@ -452,43 +209,6 @@ document.querySelectorAll('.btn-cancel-pv').forEach(cancelBtn => {
         }
       });
     });
-
-    document.querySelectorAll('.btn-delete-pv').forEach(deleteBtn => {
-  deleteBtn.addEventListener('click', async function () {
-    const row = this.closest('tr');
-    const idInput = row.dataset.idpv || null; // Nếu bạn lưu id trong data-id
-
-    // ✅ Hiển thị xác nhận trước khi xóa
-    if (!confirm(`⚠️ Bạn có chắc muốn xóa sản phẩm này không?`)) {
-      return;
-    }
-
-    try {
-      const response = await fetch("/manage/delete-productVariant", {
-        method: "POST",
-        headers: {
-           'X-CSRF-TOKEN': document.querySelector('input[name="_csrf"]')?.value || '',
-           "Content-Type": "application/x-www-form-urlencoded"
-           },
-        body: new URLSearchParams({ id: idInput })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert("🗑️ Đã xóa sản phẩm thành công!");
-        row.remove(); // Xóa dòng khỏi bảng giao diện
-      } else {
-        alert("❌ Không thể xóa: " + result.message);
-      }
-
-    } catch (error) {
-      console.error("Lỗi khi xóa:", error);
-      alert("❌ Kết nối server thất bại!");
-    }
-  });
-});
-
 //----------- đây là phần xử lý cho Product Detail----------------
 
 document.querySelectorAll(".btn-edit").forEach((btn) => {
@@ -678,46 +398,18 @@ document.querySelectorAll('.btn-delete').forEach(deleteBtn => {
     }
   });
 });
-    document.getElementById("btnAddProductDetail").addEventListener("click", function() {
-        const supplierSelect = document.getElementById("selectSupplier");
-        const productSelect = document.getElementById("selectProduct");
-
-        const supplierId = supplierSelect.value;
-        const supplierName = supplierSelect.options[supplierSelect.selectedIndex].text;
-        const productId = productSelect.value;
-        const productName = productSelect.options[productSelect.selectedIndex].text;
-
-        if (!supplierId || !productId) {
-            alert("Vui lòng chọn cả sản phẩm và nhà cung cấp!");
-            return;
-        }
-
-        const infoDiv = document.getElementById("productDetailInfo");
-        infoDiv.textContent = `Danh sách thuộc về sản phẩm ${productName} mã: ${productId} - nhà cung cấp: ${supplierName} mã: ${supplierId}`;
-    });
 
 document.getElementById("btnAddProductDetail").addEventListener("click", function () {
-  const idPAndS = document.getElementById("productDetailInfo").textContent.trim();
+  const tbody = document.querySelector("#productTable tbody");
+  const idPAndS = this.closest(".text-end")
+    .previousElementSibling // nhảy lên .card
+    .previousElementSibling // nhảy lên .idPAndS
+    .textContent.trim();
 
-    // Tạo div cho Product Detail
-    const tr1 = document.createElement("div");
-    tr1.classList.add("product-detail-row", "mb-2", "p-2", "border", "rounded");
+  // Tạo một hàng mới
+  const tr1 = document.createElement("tr");
   tr1.innerHTML = `
-  <div class="table-responsive">
-    <table class="table table-bordered table-sm" id="productDetailTable">
-        <thead>
-            <tr>
-                <th>Tên sản phẩm</th>
-                <th>Trạng thái</th>
-                <th>Mô tả</th>
-                <th>Ảnh (URL/Chọn file)</th>
-                <th>Hiển thị ảnh</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Các dòng sẽ được JS append vào đây -->
-            <input type="hidden" name="idPAndS" value="${idPAndS}">
+        <input type="hidden" name="idPAndS" value="${idPAndS}">
       <td><input type="text" name="productName" class="form-control form-control-sm" placeholder="Tên sản phẩm"></td>
       <td>
         <select name="status" class="form-control form-control-sm">
@@ -749,13 +441,9 @@ document.getElementById("btnAddProductDetail").addEventListener("click", functio
         <button type="button" class="btn btn-success btn-save btn-sm">Lưu</button>
         <button type="button" class="btn btn-danger btn-delete btn-sm ms-1">Xóa</button>
       </td>
-        </tbody>
-    </table>
-</div>
-
   `;
-    const container = document.getElementById("productDetailContainer");
-  container.appendChild(tr1);
+
+  tbody.appendChild(tr1);
 
   // 🔹 Xử lý chọn ảnh
   const imgFileInput = tr1.querySelector(".img-file");
@@ -812,7 +500,3 @@ document.getElementById("btnAddProductDetail").addEventListener("click", functio
   });
 });
 </script>
-
-
-</body>
-</html>

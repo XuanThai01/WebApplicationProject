@@ -231,13 +231,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const note = noteEl ? noteEl.textContent : ""; // nếu không tìm thấy sẽ trả về chuỗi rỗng
 
     const checkedVouchers = Array.from(document.querySelectorAll(".voucher-checkbox:checked"))
-        .map(checkbox => {
-            // Lấy phần tử cha gần nhất (ví dụ là div chứa checkbox)
-            const parent = checkbox.closest(".vochers");
-            // Lấy dữ liệu từ data attribute, ví dụ data-vid
-            return parent ? parent.dataset.idvocher : null;
-        })
-        .filter(v => v !== null); // loại bỏ trường hợp không tìm thấy parent
+        .map(cb => cb.dataset.idvocher);
 
         const selectEl = document.getElementById("shippingMethod");
         const selectedOption = selectEl.options[selectEl.selectedIndex];

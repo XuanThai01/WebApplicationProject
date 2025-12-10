@@ -2,6 +2,8 @@ package com.mycompany.webapp.service;
 
 import com.mycompany.webapp.entity.ProductDetail;
 import com.mycompany.webapp.repository.ProductDetailRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,6 +15,10 @@ public class ProductdetailService  {
     public  ProductdetailService(ProductDetailRepository productDetailRepository){
         this.productDetailRepository= productDetailRepository;
     }
+    public List<ProductDetail> getByProductId(Integer productId){
+       return productDetailRepository.findByProductId(productId);
+    }
+
 
     public List<ProductDetail> getAllPdWithPdVr(){
        return productDetailRepository.findAllWithPdvariant();

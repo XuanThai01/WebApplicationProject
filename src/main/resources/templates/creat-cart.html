@@ -82,10 +82,13 @@
                             <img id="displayed" th:src="@{${productDetail.imgProduct}}" alt="Main Image">
                         </div>
                         <div class="thumbnails">
-                            <img class="thumb" src="/images/banner/imgmini2.jpg" alt="Thumb 1">
-                            <img class="thumb" src="/images/banner/imgmini3.jpg" alt="Thumb 2">
-                            <img class="thumb" src="/images/banner/imgmini4.jpg" alt="Thumb 3">
-                            <img class="thumb" src="/images/banner/imgmini5.jpg" alt="Thumb 4">
+                            <img class="thumb"
+                                 th:src="@{${productDetail.imgProduct}}"
+                                 >
+                            <img class="thumb"
+                                 th:each="p : ${randomThumbs}"
+                                 th:src="@{${p.imgProduct}}"
+                                 >
                         </div>
                     </div>
                 </div>
@@ -119,6 +122,44 @@
                 </div>
             </div>
         </div>
+    </div>
+    <!-- Mã sản phẩm -->
+    <p class="text-muted">
+        <strong>Mã SP:</strong> <span th:text="${productDetail.pd_id}">GB2525</span>
+    </p>
+
+    <!-- Tên sản phẩm -->
+    <p class="fw-bold fs-5" th:text="${productDetail.name}">Gấu Bông Teddy Áo Big Love</p>
+
+    <!-- Mô tả sản phẩm -->
+    <p class="description">
+        Gấu Bông Teddy Áo Big Love – phiên bản mới siêu dễ thương, chất liệu cao cấp,
+        lông mềm mịn, an toàn cho bé. Thích hợp làm quà sinh nhật, Valentine, Noel hoặc trang trí phòng.
+    </p>
+
+    <!-- Danh sách kích thước & giá -->
+    <div class="product-sizes my-3">
+        <h5>Kích thước & Giá:</h5>
+        <ul class="list-group">
+
+            <!-- Tự động hiển thị từ ProductVariant -->
+            <li class="list-group-item d-flex justify-content-between align-items-center"
+                th:each="v : ${productDetail.productVariants}">
+            <span>
+                <strong th:text="${v.size}">1m6</strong>
+            </span>
+                <span class="text-danger fw-bold"
+                      th:text="${#numbers.formatDecimal(v.price, 0, 'POINT', 0, 'COMMA')} + 'đ'">1.350.000đ</span>
+            </li>
+
+        </ul>
+    </div>
+
+    <!-- Thông tin tóm tắt -->
+    <div class="alert alert-info mt-3">
+        🎁 <strong>Ưu đãi hôm nay:</strong> Tặng thiệp + gói quà miễn phí đối với đơn hàng trên 500.000đ.
+        🚚 Giao nhanh từ 1–3 ngày (tùy khu vực).
+        🔒 Cam kết đổi trả trong 7 ngày nếu lỗi từ nhà sản xuất.
     </div>
 </div>
 

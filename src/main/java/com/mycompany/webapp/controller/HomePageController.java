@@ -9,6 +9,8 @@ import com.mycompany.webapp.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +30,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.fasterxml.jackson.databind.util.ClassUtil.getRootCause;
 
 //@RequestMapping("/listpd")
 @Controller
@@ -125,6 +130,22 @@ public class HomePageController {
       public String creatCart(@RequestParam("id")Long id,Model model){
         ProductDetail pd = productdetailService.getPdWithPdvariant(id);
         model.addAttribute("productDetail",pd);
+        // 2. Lấy tất cả sản phẩm khác (ngoại trừ sản phẩm hiện tại)
+        List<ProductDetail> otherProducts = productdetailService.getByProductId(pd.getProduct().getP_id())
+                .stream()
+                .filter(p -> !p.getPd_id().equals(id))
+                .toList();
+
+        // 3. Random 4 ảnh thumbnail từ sản phẩm khác
+        List<ProductDetail> randomThumbs = otherProducts.stream()
+                .sorted((a, b) -> Math.random() > 0.5 ? 1 : -1)
+                .limit(3)
+                .toList();
+        randomThumbs.forEach(p -> System.out.println(p.getName()));
+
+        // 4. Truyền dữ liệu sang View
+
+        model.addAttribute("randomThumbs", randomThumbs);
         return "creat-cart";
      }
      @PostMapping("/cart")
@@ -196,7 +217,7 @@ public class HomePageController {
         return ResponseEntity.noContent().build(); // HTTP 204, không có body
     }
 
-    public record ProductDTO(String name) {}
+    public record ProductDTO(Long id,String name,String imgUrl) {}
     @GetMapping("/api/products/search")
     @ResponseBody
     public ResponseEntity<List<ProductDTO>> search(@RequestParam String keyword) {
@@ -204,7 +225,7 @@ public class HomePageController {
         System.out.println("Keyword: " + keyword + ", found: " + result.size());
 
         List<ProductDTO> list = result.stream()
-                .map(p -> new ProductDTO(p.getName()) )
+                .map(p -> new ProductDTO(p.getPd_id(),p.getName(),p.getImgProduct()) )
                 .toList();
 
         return ResponseEntity.ok(list);
@@ -257,6 +278,7 @@ public class HomePageController {
         List<ShippingMethod> shippingMethods = shippingMethodService.findAll();
         model.addAttribute("shippingMethods",shippingMethods);
         model.addAttribute("productPrice",total);
+        System.out.println(total);
         model.addAttribute("carts",carts);
         model.addAttribute("productVariants",productVariants);
         model.addAttribute("productDetails",productDetails);
@@ -338,12 +360,14 @@ public class HomePageController {
             response.put("success", true);
             response.put("message", "Khởi tạo đơn hàng thành công, chuyển về trang giỏ hàng để xem chi tiết");
         } catch (Exception e) {
+
             response.put("success", false);
             response.put("message", "Lỗi khi tạo đơn hàng: " + e.getMessage());
         }
         return response;
 
     }
+
     @GetMapping("/page-order-detail")
     public String getPageOderDetail(@RequestParam("oid")String orderId,Model model){
         Long orderIdLong = Long.parseLong(orderId);
@@ -460,6 +484,12 @@ public class HomePageController {
         Map<String, List<ProductDetail>> map = productdetailService.getGroupedByProductAndSupplier();
         model.addAttribute("map",map);
         System.out.println("map+" +map.size());
+        List<Product> products = productService.getAllProducts();
+        model.addAttribute("products", products);
+
+        // Lấy danh sách Supplier
+        List<Supplier> suppliers = supplierService.getAllSuppliers();
+        model.addAttribute("suppliers", suppliers);
         return "page-manage-product";
     }
     private MediaType detectImageType(byte[] imageBytes) {
@@ -665,6 +695,29 @@ public class HomePageController {
             ));
         }
     }
+    public static void debugString(String input) {
+        System.out.println("DEBUG STRING START -------------------");
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            int code = (int) c;
+
+            String display;
+            switch (code) {
+                case 10: display = "\\n"; break;   // Line Feed
+                case 13: display = "\\r"; break;   // Carriage Return
+                case 9:  display = "\\t"; break;   // Tab
+                default:
+                    if (Character.isWhitespace(c)) {
+                        display = "[space]";       // các khoảng trắng khác
+                    } else {
+                        display = String.valueOf(c);
+                    }
+            }
+
+            System.out.printf("Index %d: char='%s', code=%d%n", i, display, code);
+        }
+        System.out.println("DEBUG STRING END ---------------------");
+    }
     @PostMapping("/manage/product/add")
     @ResponseBody
     public ResponseEntity<String> addProduct(@RequestBody Map<String, String> data) {
@@ -675,21 +728,27 @@ public class HomePageController {
             String imgUrl = data.get("imgUrl");
             ProductDetail productDetail =new ProductDetail();
             String key = data.get("idPAndS");
-
+            System.out.println("key là "+key);
             if("CON_HANG".equals(status)){
                 productDetail.setStatus(1);
             }else if ("HET_HANG".equals(status)){
                 productDetail.setStatus(0);
             }
+            debugString(key);
             productDetail.setName(productName);
             productDetail.setDescriptiondetail(description);
             productDetail.setImgProduct(imgUrl);
             Integer productId = null;
             Integer supplierId = null;
-
-            java.util.regex.Matcher matcher = java.util.regex.Pattern
-                    .compile("mã\\s*:(\\d+).*mã\\s*:(\\d+)")
-                    .matcher(key);
+            for (char c : key.toCharArray()) {
+                System.out.println(c + " -> " + (int) c);
+            }
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(
+                    "mã\\s*:\\s*(\\d+).*?mã\\s*:\\s*(\\d+)",
+                    java.util.regex.Pattern.DOTALL
+                            | java.util.regex.Pattern.CASE_INSENSITIVE
+                            | java.util.regex.Pattern.UNICODE_CASE
+            ).matcher(key);
 
             if (matcher.find()) {
                 productId = Integer.parseInt(matcher.group(1));
@@ -885,7 +944,107 @@ public class HomePageController {
     }
 
     // In real project, put secret in config; for demo, read from environment or config bean
+    @PostMapping("/manage/productVariant/add")
+    public ResponseEntity<String> addProductVariant(@RequestBody Map<String, Object> data) {
 
+        try {
+            Long productId = Long.valueOf(data.get("productId").toString());
+            String color = (String) data.get("color");
+            String size = (String) data.get("size");
+            Integer quantity = Integer.valueOf(data.get("quantity").toString());
+            Long price = Long.valueOf(data.get("price").toString());
+
+            String material = (String) data.get("material");
+
+            if (productId == null) {
+                return ResponseEntity.badRequest().body("productId không được null");
+            }
+
+            // Lấy product cha
+            ProductDetail productDetail = productdetailService.getById(productId).get();
+            if (productDetail == null) {
+                return ResponseEntity.badRequest().body("Không tìm thấy sản phẩm ID: " + productId);
+            }
+
+            // Tạo mới ProductVariant
+            ProductVariant pv = new ProductVariant();
+            pv.setProductDetail(productDetail);
+            pv.setColor(color);
+            pv.setSize(size);
+            pv.setQuantity(quantity);
+            pv.setPrice(price);
+            pv.setMaterial(material);
+
+            productVariantService.save(pv);
+
+            return ResponseEntity.ok("Thêm Product Variant thành công!");
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Lỗi server: " + e.getMessage());
+        }
+    }
+    @PostMapping("/manage/delete-productVariant")
+    public ResponseEntity<Map<String, Object>> deleteProductVariant(@RequestParam("id") Long id) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (id == null) {
+            response.put("success", false);
+            response.put("message", "ID không hợp lệ!");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        try {
+            Optional<ProductVariant> pvOpt = productVariantService.getPvbyid(id);
+            if (pvOpt.isPresent()) {
+                productVariantService.delete(pvOpt.get());
+                response.put("success", true);
+                response.put("message", "Đã xóa Product Variant thành công!");
+            } else {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy Product Variant với ID: " + id);
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Lỗi server: " + e.getMessage());
+        }
+
+        return ResponseEntity.ok(response);
+    }
+    @PostMapping("/manage/productVariant/update")
+    public ResponseEntity<Map<String, Object>> updateProductVariant(
+            @RequestParam("color") String color,
+            @RequestParam("size") String size,
+            @RequestParam("quantity") Integer quantity,
+            @RequestParam("price") Long price,
+            @RequestParam("material") String material,
+            @RequestParam("idpv") Long idpv
+    ) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            // Gọi service lưu hoặc update
+            ProductVariant pv = productVariantService.getPvbyid(idpv).get();
+            pv.setColor(color);
+            pv.setSize(size);
+            pv.setQuantity(quantity);
+            pv.setPrice(price);
+            pv.setMaterial(material);
+
+            // Lưu vào database
+            productVariantService.save(pv);
+
+            response.put("success", true);
+            response.put("message", "Đã lưu Product Variant thành công!");
+            response.put("variantId", pv.getId());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "Lỗi khi lưu Product Variant: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
     }
 
 
